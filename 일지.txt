@@ -1,0 +1,34 @@
+2022.02.18
+■ 플레이어 기본 조작 구현
+ : 간단한 플랫폼 이동 구현
+ - 이동 A, D
+ - 점프 SPACE
+ - 더블점프 SPACE
+ - 벽타기 W, S
+ - 끌어당기기 R
+
+2022.02.20 
+■ 슬로우 모션 구현
+ : 오브젝트 주변에 있는 적들의 속도, 회전속도가 느려지게 함
+ 
+
+2022.02.23
+■ Inspector상 변수 이름 변경
+ : 배열을 Inspector에 띄울 시 요소의 이름이 Element N 으로 나타남
+   스킬 매니저에서 각 스킬의 활성/비활성 락/언락을 관리하려는데 스킬 이름이 아닌 Element N으로 나타나 불편했음
+   //스킬 인덱스를 enum으로 정의하고 배열로 SkillInfo를 저장
+	-> PropertyAttribute를 상속받은 NamedArrayElementAttribute 클래스를 만들고, 멤버필드에 string 타입의 name을 추가한 뒤 생성자로 받도록 구현
+	-> PropertyDrawer를 상속받고, NamedArrayElementAttribute타입의 CustomPropertyDrawer Attribute를 속성을 지정한 NamedArrayElementTitleDrawer 클래스 생성
+	
+
+2022.02.24
+■ Connection 스크립트
+ : 문과 문을 여는 스위치를 연결시키기 위해 구현함
+ - 배열로 연결할 게임 오브젝트를 저장
+ - 커넥션 정보를 에디터상에서 그림 
+	-> CustomEdtior Attribute를 사용한 ConnectionDrawScript작성
+	-> Connection 이 배열로 저장하고 있는 연결 객체를 순회하며 라인을 그리도록 구현
+ 
+■ Interaction 스크립트
+ : 스위치와 상호작용을 위해 구현함
+ 
