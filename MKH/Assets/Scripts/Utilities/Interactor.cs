@@ -26,10 +26,5 @@ public class Interactor : MonoBehaviour
         {
             return;
         }
-
-        if(true == Input.GetKeyDown(KeyCode.E))
-        {
-
-        }
     }
 }

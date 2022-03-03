@@ -3,19 +3,29 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class DoorHandle : MonoBehaviour
+public class DoorHandle : Interactable
 {
     public GameObject door;
 
     // Start is called before the first frame update
     void Start()
     {
-        Door doorScript = door.GetComponent<Door>();
+
     }
 
     // Update is called once per frame
     void Update()
     {
+
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(false == other.gameObject.CompareTag("Player"))
+        {
+            return;
+        }
+
 
     }
 }
