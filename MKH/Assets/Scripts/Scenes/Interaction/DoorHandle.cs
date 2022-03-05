@@ -5,12 +5,11 @@ using UnityEditor;
 
 public class DoorHandle : Interactable
 {
-    public GameObject door;
-
+    private Connector connector;
     // Start is called before the first frame update
     void Start()
     {
-
+        connector = GetComponent<Connector>();
     }
 
     // Update is called once per frame
@@ -19,13 +18,20 @@ public class DoorHandle : Interactable
 
     }
 
-    private void OnTriggerEnter(Collider other)
+    public override void OnInteract()
     {
-        if(false == other.gameObject.CompareTag("Player"))
-        {
-            return;
-        }
+        base.OnInteract();
 
+        foreach(GameObject gameObject in connector.linkedObjects)
+        {
+            Door door = gameObject.GetComponent<Door>();
+            if(null == door)
+            {
+                Debug.Log("Door °´Ã¼°¡ ¾Æ´Õ´Ï´Ù.");
+            }
+
+            door.Open();
+        }
 
     }
 }
