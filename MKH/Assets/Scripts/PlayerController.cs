@@ -89,7 +89,6 @@ public class PlayerController : MonoBehaviour
         else
         {
             playerRigidbody.useGravity = true;
-            int a = 0;
             // 벽이 위쪽 끝에 도달했으니 코너모드
             if (true == isClimb && moveVector.y > 0f)
             {
