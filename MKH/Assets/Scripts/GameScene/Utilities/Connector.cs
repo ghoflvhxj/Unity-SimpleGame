@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
+#if UNITY_EDITOR
 [CustomEditor(typeof(Connector))]
 class ConnectionDrawScipt : Editor
 {
@@ -21,7 +22,7 @@ class ConnectionDrawScipt : Editor
         }
     }
 }
-
+#endif
 
 public class Connector : MonoBehaviour
 {

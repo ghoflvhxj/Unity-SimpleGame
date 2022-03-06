@@ -5,6 +5,8 @@ using UnityEngine;
 
 using UnityEditor;
 
+#if UNITY_EDITOR
+
 public class NamedArrayElementAttribute : PropertyAttribute
 {
     public string name;
@@ -50,3 +52,5 @@ public class NamedArrayElementTitleDrawer : PropertyDrawer
         return name;
     }
 }
+
+#endif

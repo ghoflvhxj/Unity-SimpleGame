@@ -20,7 +20,9 @@ public class SkillManager : MonoBehaviour
         public bool active;
     }
 
+#if UNITY_EDITOR
     [NamedArrayElement("skill")]
+#endif
     public SkillInfo[] skillInfo = new SkillInfo[(int)Skill.Count];
 
     public SkillManager()
