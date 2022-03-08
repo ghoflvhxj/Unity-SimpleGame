@@ -11,12 +11,14 @@ public class PlayerController : MonoBehaviour
     private SkillManager skillManager;
 
     // Components
-    private CapsuleCollider playerCollider;
-    private Rigidbody  playerRigidbody;
+    private CapsuleCollider2D playerCollider;
+    private Rigidbody2D  playerRigidbody;
 
     [SerializeField]  private float moveSpeed = 1.0f;
     private Vector3 moveVector = Vector3.zero;
 
+    private Vector2 climbRayOrigin = Vector3.zero;
+    private Vector2 climbRayHitPoint = Vector3.zero;
     private bool isClimb = false;
     private bool isClimbRayHit = false;
     private bool isGround = true;
@@ -37,8 +39,8 @@ public class PlayerController : MonoBehaviour
         gameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManager>();
         skillManager = GameObject.FindWithTag("SkillManager").GetComponent<SkillManager>();
 
-        playerCollider = GetComponent<CapsuleCollider>();
-        playerRigidbody = GetComponent<Rigidbody>();
+        playerCollider = GetComponent<CapsuleCollider2D>();
+        playerRigidbody = GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
@@ -49,8 +51,7 @@ public class PlayerController : MonoBehaviour
 
         if (climbState == CLIMBSTATE.CORNER)
         {
-            playerRigidbody.AddForce(transform.forward + transform.up * 10.0f, ForceMode.VelocityChange);
-            isClimb = false;
+            playerRigidbody.AddForce(transform.right + transform.up * 200.0f, ForceMode2D.Impulse);
             climbState = CLIMBSTATE.COUNT;
         }
     }
@@ -58,9 +59,7 @@ public class PlayerController : MonoBehaviour
     private void CheckState()
     {
         // 땅 검사
-        RaycastHit hitInfo = new RaycastHit();
-        bool isGroundRayHit = Physics.Raycast(transform.position, -Vector3.up, out hitInfo, playerCollider.height / 2f + 0.1f);
-        
+        bool isGroundRayHit = Physics2D.Raycast(transform.position, -Vector3.up, playerCollider.size.y / 2f + 0.1f);
         if(true == isGroundRayHit)
         {
             isGround = true;
@@ -71,29 +70,46 @@ public class PlayerController : MonoBehaviour
         }
 
         // 벽 타기
-        RaycastHit rayHitInfo = new RaycastHit();
-        Vector3 offset = new Vector3(0.0f, 0.5f, 0.0f);
-        isClimbRayHit = Physics.Raycast(transform.position + offset, transform.forward, out rayHitInfo, playerCollider.radius);
+        ContactFilter2D contactFilter = new ContactFilter2D();
+        contactFilter.maxDepth = 3;
+        contactFilter.minDepth = -3;
 
+        climbRayOrigin = transform.position + new Vector3(0f, -playerCollider.size.y / 3f);
+        RaycastHit2D rayHitInfo = Physics2D.CapsuleCast(climbRayOrigin, playerCollider.size/10f, CapsuleDirection2D.Vertical, 0f, transform.right, playerCollider.size.x/2f + 0.1f);
+        isClimbRayHit = (rayHitInfo.collider != null);
         if (true == isClimbRayHit)
         {
-            if (false == isClimb && true == rayHitInfo.collider.gameObject.CompareTag("Scene"))
+            climbRayHitPoint = rayHitInfo.point;
+            if (Vector2.Dot(rayHitInfo.normal, (climbRayHitPoint - climbRayOrigin).normalized) < -0.8f)
             {
-                climbState = CLIMBSTATE.WALL;
-                isClimb = true;
+                Debug.DrawLine(climbRayOrigin, climbRayHitPoint);
+                Debug.DrawLine(climbRayHitPoint, climbRayHitPoint + rayHitInfo.normal, Color.red);
 
-                playerRigidbody.velocity = Vector3.zero;
-                playerRigidbody.useGravity = false;
+                if (false == isClimb && true == rayHitInfo.collider.gameObject.CompareTag("Scene"))
+                {
+                    playerRigidbody.velocity = Vector3.zero;
+                    playerRigidbody.gravityScale = 0f;
+
+                    climbState = CLIMBSTATE.WALL;
+                    isClimb = true;
+
+                }
             }
         }
         else
         {
-            playerRigidbody.useGravity = true;
+            playerRigidbody.gravityScale = 1f;
+
             // 벽이 위쪽 끝에 도달했으니 코너모드
             if (true == isClimb && moveVector.y > 0f)
             {
                 climbState = CLIMBSTATE.CORNER;
             }
+            else
+            {
+                climbState = CLIMBSTATE.COUNT;
+            }
+            isClimb = false;
         }
 
         if (true == isGround || true == isClimb)
@@ -131,6 +147,12 @@ public class PlayerController : MonoBehaviour
                 {
                     verticalMove = new Vector3(0f, verticalInput * gameManager.GetPlayerDeltaTime() * 3f, 0f);
                 }
+
+                if(Vector2.Distance(climbRayHitPoint, climbRayOrigin) >= playerCollider.size.x/2f + 0.1f)
+                {
+                    Vector3 directionToWall = new Vector3(climbRayHitPoint.x - transform.position.x, 0f, 0f).normalized;
+                    HorizontalMove(isClimbRayHit == true ? 1f : 0f, out horizontalMove);
+                }
             }
             else
             {
@@ -140,12 +162,6 @@ public class PlayerController : MonoBehaviour
                     HorizontalMove(horizontalInput, out horizontalMove);
                 }
             }
-
-            //temp += horizontalInput / 2.0f;
-            //Vector3 lineStart = transform.position;
-            //Vector3 lineEnd = transform.position + (Quaternion.AngleAxis(temp, Vector3.right) * transform.forward);
-            //Debug.DrawLine(lineStart, lineEnd);
-
         }
 
         moveVector = horizontalMove + verticalMove;
@@ -193,12 +209,12 @@ public class PlayerController : MonoBehaviour
     private void HorizontalMove(float horizontalInput, out Vector3 horizontalMove)
     {
         // 이동 벡터 계산
-        horizontalMove = new Vector3(0.0f, 0.0f, Mathf.Abs(horizontalInput) * gameManager.GetPlayerDeltaTime() * moveSpeed);
+        horizontalMove = new Vector3(Mathf.Abs(horizontalInput) * gameManager.GetPlayerDeltaTime() * moveSpeed, 0f, 0f);
     }
     
     private void Jump()
     {
         playerRigidbody.velocity = Vector3.zero;
-        playerRigidbody.AddForce(Vector3.up * 300.0f, ForceMode.Impulse);
+        playerRigidbody.AddForce(Vector3.up * 300.0f, ForceMode2D.Impulse);
     }
 }

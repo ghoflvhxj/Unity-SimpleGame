@@ -21,7 +21,7 @@ public class CameraScript : MonoBehaviour
         Vector3 cameraPosition = new Vector3(transform.position.x, transform.position.y, 0f);
         Vector3 playerPosition = new Vector3(player.transform.position.x, player.transform.position.y, 0f);
         Vector3 cameraXYposition = Vector3.Lerp(cameraPosition, playerPosition, Vector3.Distance(cameraPosition, playerPosition) / lerpFactor);
-        Vector3 cameraZPosition = new Vector3(0f, 0f, distance);
+        Vector3 cameraZPosition = new Vector3(0f, 0f, -distance);
         transform.position = cameraXYposition + cameraZPosition;
     }
 }
