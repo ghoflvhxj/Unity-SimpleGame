@@ -15,7 +15,7 @@ public class Trampoline : MonoBehaviour
     {
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
         // 플레이어만 사용
         if(false == collision.gameObject.CompareTag("Player"))
@@ -23,15 +23,14 @@ public class Trampoline : MonoBehaviour
             return;
         }
 
-        Rigidbody rigidbody = collision.gameObject.GetComponent<Rigidbody>();
+        Rigidbody2D rigidbody = collision.gameObject.GetComponent<Rigidbody2D>();
 
-        // 낙하 할때만 트램펄린 동작
-        if(rigidbody.velocity.y > 0.0f)
+        if(null == rigidbody)
         {
-            return;
+            Debug.LogError("플레이어인데 Rigidbody 컴포넌트가 없습니다");
         }
 
         rigidbody.velocity = Vector3.zero;
-        rigidbody.AddForce(Vector3.up * 20.0f, ForceMode.VelocityChange);
+        rigidbody.AddForce(Vector3.up * 800.0f, ForceMode2D.Impulse);
     }
 }

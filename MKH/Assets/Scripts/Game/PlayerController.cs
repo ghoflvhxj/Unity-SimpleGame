@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour
     private bool isClimbRayHit = false;
     private bool isGround = true;
 
+    float horizontalInput = 0f;
     float verticalInput = 0f;
 
     CLIMBSTATE climbState = CLIMBSTATE.COUNT;
@@ -85,14 +86,27 @@ public class PlayerController : MonoBehaviour
                 Debug.DrawLine(climbRayOrigin, climbRayHitPoint);
                 Debug.DrawLine(climbRayHitPoint, climbRayHitPoint + rayHitInfo.normal, Color.red);
 
-                if (false == isClimb && true == rayHitInfo.collider.gameObject.CompareTag("Scene"))
+                if(true == rayHitInfo.collider.gameObject.CompareTag("Scene"))
                 {
-                    playerRigidbody.velocity = Vector3.zero;
-                    playerRigidbody.gravityScale = 0f;
+                    if(false == isClimb)
+                    {
+                        playerRigidbody.velocity = Vector3.zero;
+                        playerRigidbody.gravityScale = 0f;
 
-                    climbState = CLIMBSTATE.WALL;
-                    isClimb = true;
+                        climbState = CLIMBSTATE.WALL;
+                        isClimb = true;
+                    }
+                    else
+                    {
+                        if(horizontalInput == GetDirectionToWall().x)
+                        {
+                            playerRigidbody.velocity = Vector3.zero;
+                            playerRigidbody.gravityScale = 0f;
 
+                            climbState = CLIMBSTATE.WALL;
+                            isClimb = true;
+                        }
+                    }
                 }
             }
         }
@@ -120,7 +134,7 @@ public class PlayerController : MonoBehaviour
 
     private void CheckInput()
     {
-        float horizontalInput = Input.GetAxis("Horizontal");
+        horizontalInput = Input.GetAxis("Horizontal");
         Vector3 horizontalMove = Vector3.zero;
 
         verticalInput           = Input.GetAxis("Vertical");
@@ -133,21 +147,22 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            // 방향 처리
-            // 좌우 입력이 없으면, 벽으로 방향을 돌림
+            // 좌우 입력이 없으면
             if(0f == horizontalInput)
             {
-                if (false == isClimbRayHit)
+                // 벽을 보고있다면 수직이동, 아니면 벽을 보도록 회전
+                if (true == isClimbRayHit)
+                {
+                    verticalMove = new Vector3(0f, verticalInput * gameManager.GetPlayerDeltaTime() * 3f, 0f);
+                }
+                else
                 {
                     Vector3 rotation = Vector3.zero;
                     rotation.y = (transform.eulerAngles.y == 0f) ? 180f : 0f;
                     transform.eulerAngles = rotation;
                 }
-                else
-                {
-                    verticalMove = new Vector3(0f, verticalInput * gameManager.GetPlayerDeltaTime() * 3f, 0f);
-                }
 
+                // 벽과 가까이 붙어있게 함
                 if(Vector2.Distance(climbRayHitPoint, climbRayOrigin) >= playerCollider.size.x/2f + 0.1f)
                 {
                     Vector3 directionToWall = new Vector3(climbRayHitPoint.x - transform.position.x, 0f, 0f).normalized;
@@ -169,11 +184,13 @@ public class PlayerController : MonoBehaviour
 
         if (true == Input.GetKeyDown(KeyCode.Space))
         {
-            if (true == isGround || true == isClimb)
+            if(true == isGround)
             {
                 Jump();
-                isGround = false;
-                isClimb = false;
+            }
+            else if (true == isClimb)
+            {
+                Jump(300f, 100f * -GetDirectionToWall().x );
             }
             else
             {
@@ -212,9 +229,14 @@ public class PlayerController : MonoBehaviour
         horizontalMove = new Vector3(Mathf.Abs(horizontalInput) * gameManager.GetPlayerDeltaTime() * moveSpeed, 0f, 0f);
     }
     
-    private void Jump()
+    private void Jump(float upScale = 300f, float rightScale = 0f)
     {
         playerRigidbody.velocity = Vector3.zero;
-        playerRigidbody.AddForce(Vector3.up * 300.0f, ForceMode2D.Impulse);
+        playerRigidbody.AddForce((Vector3.up * upScale) + (Vector3.right * rightScale), ForceMode2D.Impulse);
+    }
+
+    private Vector3 GetDirectionToWall()
+    {
+        return new Vector3(climbRayHitPoint.x - transform.position.x, 0f, 0f).normalized;
     }
 }
