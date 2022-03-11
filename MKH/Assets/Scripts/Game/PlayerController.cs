@@ -171,7 +171,7 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                HorizontalTurn(horizontalInput);
+                //HorizontalTurn(horizontalInput);
                 if(true == isGround)
                 {
                     HorizontalMove(horizontalInput, out horizontalMove);

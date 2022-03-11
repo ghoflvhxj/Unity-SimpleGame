@@ -3739,6 +3739,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SpirteCollider
       objectReference: {fileID: 0}
+    - target: {fileID: 5967693169690168349, guid: 959ed8b05914a14459739c17be57cc1c, type: 3}
+      propertyPath: m_TagString
+      value: Scene
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 959ed8b05914a14459739c17be57cc1c, type: 3}
 --- !u!4 &1810428356 stripped
